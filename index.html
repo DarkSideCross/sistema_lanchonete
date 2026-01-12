@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pedidos - Lanchonete</title>
+
+<style>
+    body {
+        background-color: #000;
+        color: red;
+        font-family: Arial, sans-serif;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid red;
+        padding: 5px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #111;
+    }
+
+    input, select {
+        width: 100%;
+        background-color: #000;
+        color: red;
+        border: none;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    input:focus, select:focus {
+        outline: 1px solid red;
+    }
+
+    button {
+        margin: 10px 0;
+        padding: 8px 15px;
+        background-color: red;
+        color: black;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Controle de Pedidos</h2>
+
+<button onclick="adicionarLinha()">Adicionar Pedido</button>
+
+<table id="tabela">
+    <thead>
+        <tr>
+            <th>Nº Pedido</th>
+            <th>Valor</th>
+            <th>Motoboy</th>
+            <th>Status</th>
+            <th>Taxa Entrega</th>
+            <th>Retirada</th>
+            <th>Nº Retirada</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+function adicionarLinha() {
+    const tbody = document.querySelector("#tabela tbody");
+    const tr = document.createElement("tr");
+
+   tr.classList.add('lines');
+
+    tr.innerHTML = `
+        <td><input type="number" class="pedido"></td>
+        <td><input type="number"></td>
+        <td><input type="text"></td>
+        <td>
+            <select>
+                <option>Não</option>
+                <option>PAGO</option>
+                <option>OK</option>
+            </select>
+        </td>
+        <td><input type="number"></td>
+        <td><input type="number"></td>
+        <td><input type="number"></td>
+    `;
+
+    tbody.appendChild(tr);
+
+    ativarEnter(tr);
+}
+
+// ativa o ENTER em todos os campos da linha
+function ativarEnter(tr) {
+    const campos = tr.querySelectorAll("input, select");
+
+    campos.forEach((campo, index) => {
+        campo.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                // valida número do pedido
+                if (campo.classList.contains("pedido")) {
+                    if (!verificarPedido(campo)) {
+                        campo.focus();
+                        return;
+                    }
+                }
+
+                // vai para o próximo campo
+                if (index + 1 < campos.length) {
+                    campos[index + 1].focus();
+                } else {
+                    adicionarLinha();
+                    setTimeout(() => {
+                        const ultimaLinha = document.querySelector("#tabela tbody tr:last-child input");
+                        ultimaLinha.focus();
+                    }, 10);
+                }
+            }
+        });
+    });
+}
+
+// valida pedido duplicado
+function verificarPedido(input) {
+    const valor = input.value;
+    if (!valor) return true;
+
+    const pedidos = document.querySelectorAll(".pedido");
+    let contador = 0;
+
+    pedidos.forEach(p => {
+        if (p.value === valor) contador++;
+    });
+
+    if (contador > 1) {
+        alert("Esse número de pedido já existe!");
+        input.value = "";
+        return false;
+    }
+    return true;
+}
+
+document.addEventListener("keydown", function (e) {
+    const elementoAtivo = document.activeElement;
+
+    const estaDigitando =
+        elementoAtivo.tagName === "INPUT" ||
+        elementoAtivo.tagName === "TEXTAREA" ||
+        elementoAtivo.tagName === "SELECT" ||
+        elementoAtivo.isContentEditable;
+
+    if (estaDigitando) return; // não interfere nos inputs
+
+    // 👇 daqui pra baixo só roda se NÃO estiver digitando
+    if (e.key.toLowerCase() === "f") {
+        adicionarLinha();
+    }
+
+   console.log(e);
+
+   if (e.ctrlKey && e.key.toLowerCase() === 'x') {
+	
+   const lines = document.querySelectorAll('.lines');
+   const lastLine = lines[lines.length-1];
+   lastLine.remove();
+	
+   }
+});
+</script>
+
+
+</body>
+</html>
