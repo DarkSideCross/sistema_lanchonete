@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pedidos - Lanchonete</title>
+
+<style>
+    body {
+        background-color: #000;
+        color: red;
+        font-family: Arial, sans-serif;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 75%;
+    }
+
+    th, td {
+        border: 1px solid red;
+        padding: 5px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #111;
+    }
+
+    input, select {
+        width: 100%;
+        background-color: #000;
+        color: white;
+        border: none;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+        outline: 1px solid red;
+    }
+
+    button {
+        margin: 10px 0;
+        padding: 8px 15px;
+        background-color: red;
+        color: black;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    input {
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .num-entrega {
+        width: 37px;
+    }
+
+    .valor {
+        width: 0px;
+    }
+
+    .motoboy {
+        width: 50px;
+    }
+
+    .status {
+        width: 20px;
+    }
+
+    .taxa {
+        width: 30px;
+    }
+
+    .retirada {
+        width: 10px;
+    }
+
+    .num-retirada {
+        width: 40px;
+    }
+
+    #tabela-resultados {
+        margin-top: 30rem;
+    }
+
+    #tabela-resultados tbody tr td {
+        height: 1rem;
+    }
+
+    #calcular {
+        width: 75%;
+        border: 2px solid red;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Controle de Pedidos</h2>
+
+<button onclick="adicionarLinha()">Adicionar Pedido</button>
+
+<table id="tabela">
+    <thead>
+        <tr>
+            <th class="num-entrega">N°</th>
+            <th class="valor">VAL</th>
+            <th class="motoboy">Nome</th>
+            <th class="status">Status</th>
+            <th class="taxa">Taxa</th>
+            <th class="retirada">VAL</th>
+            <th class="num-retirada">N°</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table> 
+
+<table id="tabela-resultados">
+    <thead>
+        <tr>
+            <th>TOTAL</th>
+            <th>ENTREGA</th>
+            <th>RETIRADA</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="td-total"></td>
+            <td class="td-entrega"></td>
+            <td class="td-retirada"></td>
+        </tr>
+    </tbody>
+</table>
+<input type="submit" value="CALCULAR" id="calcular">
+
+
+<script>
+function adicionarLinha() {
+    const tbody = document.querySelector("#tabela tbody");
+    const tr = document.createElement("tr");
+
+   tr.classList.add('lines');
+
+    tr.innerHTML = `
+        <td class="num-entrega"><input type="number" class="pedido-entrega"></td>
+        <td><input type="number" class="valor-entrega"></td>
+        <td><input type="text" class="motoboy"></td>
+        <td>
+            <select>
+                <option>Não</option>
+                <option>PAGO</option>
+                <option>OK</option>
+            </select>
+        </td>
+        <td><input type="number" class="taxa"></td>
+        <td><input type="number" class="valor-retirada"></td>
+        <td><input type="number" class="pedido-retirada"></td>
+    `;
+
+    tbody.appendChild(tr);
+
+    ativarEnter(tr);
+}
+
+// ativa o ENTER em todos os campos da linha
+function ativarEnter(tr) {
+    const campos = tr.querySelectorAll("input, select");
+
+    const firstInput = campos[0];
+
+    firstInput.focus();
+
+    console.log(firstInput)
+
+    campos.forEach((campo, index) => {
+        campo.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                // valida número do pedido
+                if (campo.classList.contains("pedido")) {
+                    if (!verificarPedido(campo)) {
+                        campo.focus();
+                        return;
+                    }
+                }
+
+                // vai para o próximo campo
+                if (index + 1 < campos.length) {
+                    campos[index + 1].focus();
+                } else {
+                    adicionarLinha();
+                    setTimeout(() => {
+                        const ultimaLinha = document.querySelector("#tabela tbody tr:last-child input");
+                        ultimaLinha.focus();
+                    }, 10);
+                }
+            }
+        });
+    });
+}
+
+// valida pedido duplicado
+function verificarPedido(input) {
+    const valor = input.value;
+    if (!valor) return true;
+
+    const pedidos = document.querySelectorAll(".pedido");
+    let contador = 0;
+
+    pedidos.forEach(p => {
+        if (p.value === valor) contador++;
+    });
+
+    if (contador > 1) {
+        alert("Esse número de pedido já existe!");
+        input.value = "";
+        return false;
+    }
+    return true;
+}
+
+document.addEventListener("keydown", function (e) {
+    const elementoAtivo = document.activeElement;
+
+    const estaDigitando =
+        elementoAtivo.tagName === "INPUT" ||
+        elementoAtivo.tagName === "TEXTAREA" ||
+        elementoAtivo.tagName === "SELECT" ||
+        elementoAtivo.isContentEditable;
+
+    if (estaDigitando) return; // não interfere nos inputs
+
+    // 👇 daqui pra baixo só roda se NÃO estiver digitando
+    if (e.key.toLowerCase() === "f") {
+        adicionarLinha();
+    }
+
+   console.log(e);
+
+   if (e.ctrlKey && e.key.toLowerCase() === 'x') {
+	
+   const lines = document.querySelectorAll('.lines');
+   const lastLine = lines[lines.length-1];
+   lastLine.remove();
+	
+   }
+});
+
+const span = document.querySelector('#teste');
+
+document.querySelector('#calcular').addEventListener('click', (evt) => {
+
+    const tdTotal = document.querySelector('.td-total');
+    const tdEntrega = document.querySelector('.td-entrega');
+    const tdRetirada = document.querySelector('.td-retirada');
+
+    console.log(tdRetirada)
+
+
+    const totalEntregas = [...document.querySelectorAll('.valor-entrega')].map(e => Number(e.value)).reduce((acc, e) => acc + e);
+    const totalRetiradas = [...document.querySelectorAll('.valor-retirada')].map(e => Number(e.value)).reduce((acc, e) => acc + e);
+
+    console.log(totalRetiradas)
+
+    tdEntrega.innerText = totalEntregas;
+    tdRetirada.innerText = totalRetiradas;
+    tdTotal.innerText = totalEntregas + totalRetiradas;
+})
+
+
+</script>
+
+
+</body>
+</html>
